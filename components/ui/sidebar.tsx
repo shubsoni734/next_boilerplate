@@ -3,7 +3,9 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
-import { PanelLeft } from "lucide-react"
+import { PanelLeft, PanelRightClose, PanelRightOpen } from "lucide-react"
+
+
 
 
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -163,6 +165,7 @@ const Sidebar = React.forwardRef<
     side?: "left" | "right"
     variant?: "sidebar" | "floating" | "inset"
     collapsible?: "offcanvas" | "icon" | "none"
+    rounded?: boolean;
   }
 >(
   (
@@ -172,11 +175,12 @@ const Sidebar = React.forwardRef<
       collapsible = "offcanvas",
       className,
       children,
+      rounded = false,
       ...props
     },
     ref
   ) => {
-    const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+    const { isMobile, state, openMobile, setOpenMobile, open } = useSidebar()
 
     if (collapsible === "none") {
       return (
@@ -216,7 +220,7 @@ const Sidebar = React.forwardRef<
     return (
       <div
         ref={ref}
-        className="group peer hidden md:block text-sidebar-foreground"
+        className={cn(`group peer hidden md:block text-sidebar-foreground ${rounded && open ? "rounded-r-[30px]" : "rounded-r-[25px]"} `, className)}
         data-state={state}
         data-collapsible={state === "collapsed" ? collapsible : ""}
         data-variant={variant}
@@ -264,22 +268,25 @@ const SidebarTrigger = React.forwardRef<
   React.ElementRef<typeof Button>,
   React.ComponentProps<typeof Button>
 >(({ className, onClick, ...props }, ref) => {
-  const { toggleSidebar } = useSidebar()
-
+  const { toggleSidebar, open } = useSidebar();
   return (
     <Button
       ref={ref}
       data-sidebar="trigger"
       variant="ghost"
       size="icon"
-      className={cn("h-7 w-7", className)}
+      className={cn("h-10 w-10", className)}
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()
       }}
       {...props}
     >
-      <PanelLeft />
+      {open ?
+        <PanelRightOpen size={50} className="w-20 h-20" />
+        :
+        <PanelRightClose size={50} className="w-20 h-20" />
+      }
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   )
